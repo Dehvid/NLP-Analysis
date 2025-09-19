@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP Analysis</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f6f9;
+            color: #333;
+        }
+        header {
+            background: #4a90e2;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: vertical;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #357ab8;
+        }
+        h2 {
+            margin-top: 2rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+            color: #4a90e2;
+        }
+        .results-section {
+            margin-bottom: 2rem;
+        }
+        ul, ol {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background: #f0f4f8;
+        }
+        .token-card {
+            background: #f9fafc;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>NLP Analysis Tool</h1>
+        <p>Analyze your text with NLP techniques</p>
+    </header>
+    <main>
+        <form method="POST">
+            <label for="text"><strong>Enter your text:</strong></label>
+            <textarea name="text" rows="6" placeholder="Type or paste text here...">{{ request.form.get('text', '') }}</textarea>
+            <button type="submit">Analyze</button>
+        </form>
+
+        {% if results %}
+            <div class="results-section">
+                <h2>Sentence Boundary Detection</h2>
+                <ul>
+                    {% for sentence in results.sentences %}
+                        <li>{{ sentence }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="results-section">
+                <h2>Token Information</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Text</th>
+                            <th>POS</th>
+                            <th>Lemma</th>
+                            <th>Shape</th>
+                            <th>Alpha?</th>
+                            <th>Stopword?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for token in results.token_info %}
+                        <tr>
+                            <td>{{ token.text }}</td>
+                            <td>{{ token.pos }}</td>
+                            <td>{{ token.lemma }}</td>
+                            <td>{{ token.shape }}</td>
+                            <td>{{ token.is_alpha }}</td>
+                            <td>{{ token.is_stop }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="results-section">
+                <h2>Named Entities</h2>
+                {% if results.entities %}
+                    <ul>
+                        {% for ent, label in results.entities %}
+                            <li><strong>{{ ent }}</strong> – {{ label }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No entities detected.</p>
+                {% endif %}
+            </div>
+
+            <div class="results-section">
+                <h2>Filtered Tokens</h2>
+                <p>{{ results.filtered | join(', ') }}</p>
+            </div>
+
+            <div class="results-section">
+                <h2>Stemmed Tokens</h2>
+                <p>{{ results.stemmed | join(', ') }}</p>
+            </div>
+
+            <div class="results-section">
+                <h2>Lemmatized Tokens</h2>
+                <p>{{ results.lemmatized | join(', ') }}</p>
+            </div>
+
+            <div class="results-section">
+                <h2>Vectorized Representation (Bag of Words)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for word, count in results.vectorized.items() %}
+                        <tr>
+                            <td>{{ word }}</td>
+                            <td>{{ count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </main>
+</body>
+</html>
